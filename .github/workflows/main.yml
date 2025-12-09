@@ -1,37 +1,36 @@
-name: Build RedTrainer client (Maven)
+name: Build RedTrainer Client JAR
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-client:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Java 17 (Temurin) and enable Maven cache
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
 
-      - name: Show Java version
-        run: java -version
+    - name: Build client
+      working-directory: client
+      run: mvn clean package -DskipTests
 
-      - name: Build client with Maven
-        working-directory: client
-        run: mvn -B clean package -DskipTests
+    - name: List generated JAR
+      run: ls -lh client/target/
 
-      - name: List build outputs
-        run: ls -la client/target || true
-
-      - name: Upload client JAR artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: redtrainer-client-jar
-          path: client/target/*.jar
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RedTrainer-client-jar
+        path: client/target/*.jar
